@@ -6,6 +6,7 @@ Usage:
     uv run python run.py --urls-file urls_10.txt --limit 10
     uv run python run.py --no-build --urls-file urls_10.txt
     uv run python run.py --report-only --job-dir output/jobs/job_xxx
+    uv run python run.py --urls-file urls_10.txt --cpus 2 --memory 4G
 """
 
 import argparse
@@ -39,12 +40,21 @@ def run_container(
     urls_volume: str,
     output_volume: str,
     extra_args: list[str],
+    cpus: str = "",
+    memory: str = "",
 ) -> bool:
     """Run a single container for collect-only mode."""
-    print(f"==> Running {service} container")
+    print(f"==> Running {service} container"
+          f"{f' (cpus={cpus}, memory={memory})' if cpus or memory else ''}")
     cmd = [
         "docker", "compose", "-f", str(COMPOSE_FILE),
         "run", "--rm",
+    ]
+    if cpus:
+        cmd += ["--cpus", cpus]
+    if memory:
+        cmd += ["--memory", memory]
+    cmd += [
         "-v", urls_volume,
         "-v", output_volume,
         service,
@@ -98,6 +108,12 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Existing job directory (for --report-only or to append)")
     parser.add_argument("--parallel", action="store_true",
                         help="Run containers in parallel (default: sequential)")
+    parser.add_argument("--cpus", type=str, default="",
+                        help="Docker CPU limit per container (e.g. '2', '4'). "
+                             "Overrides docker-compose.yml setting.")
+    parser.add_argument("--memory", type=str, default="",
+                        help="Docker memory limit per container (e.g. '4G', '8G'). "
+                             "Overrides docker-compose.yml setting.")
     parser.add_argument("--diff-pairs", type=str, default=None,
                         help="Comma-separated pairs for diff images, e.g. 'HL-HF,HS-HF'. "
                              "If omitted, no diff images are generated.")
@@ -175,7 +191,8 @@ def main() -> None:
             with ThreadPoolExecutor(max_workers=len(SERVICES)) as pool:
                 futures = {
                     pool.submit(
-                        run_container, service, urls_volume, output_volume, extra_args
+                        run_container, service, urls_volume, output_volume,
+                        extra_args, args.cpus, args.memory,
                     ): service
                     for service in SERVICES
                 }
@@ -192,7 +209,8 @@ def main() -> None:
                     print(f"Warning: {', '.join(failed)} failed.")
         else:
             for service in SERVICES:
-                run_container(service, urls_volume, output_volume, extra_args)
+                run_container(service, urls_volume, output_volume,
+                              extra_args, args.cpus, args.memory)
 
         # Merge results and generate reports
         merge_report(job_dir, diff_pairs=args.diff_pairs)

@@ -10,6 +10,7 @@ Usage:
     uv run python run_scaling.py --urls-file urls_10.txt --no-build
     uv run python run_scaling.py --urls-file urls_10.txt --modes headless-shell --workers 4,8
     uv run python run_scaling.py --report-only --job-dir output/jobs/scaling_xxx
+    uv run python run_scaling.py --urls-file urls_10.txt --cpus 2 --memory 4G
 """
 
 import argparse
@@ -48,12 +49,21 @@ def run_scaling_container(
     urls_volume: str,
     output_volume: str,
     extra_args: list[str],
+    cpus: str = "",
+    memory: str = "",
 ) -> bool:
     """Run one container for a (mode, workers) configuration."""
-    print(f"\n==> Running {service} — {num_workers} workers")
+    print(f"\n==> Running {service} — {num_workers} workers"
+          f"{f' (cpus={cpus}, memory={memory})' if cpus or memory else ''}")
     cmd = [
         "docker", "compose", "-f", str(COMPOSE_FILE),
         "run", "--rm",
+    ]
+    if cpus:
+        cmd += ["--cpus", cpus]
+    if memory:
+        cmd += ["--memory", memory]
+    cmd += [
         "-v", urls_volume,
         "-v", output_volume,
         service,
@@ -126,6 +136,12 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Existing job directory (for --report-only)")
     parser.add_argument("--batch-size", type=int, default=10,
                         help="Batch size passed to collector")
+    parser.add_argument("--cpus", type=str, default="",
+                        help="Docker CPU limit per container (e.g. '2', '4'). "
+                             "Overrides docker-compose.yml setting.")
+    parser.add_argument("--memory", type=str, default="",
+                        help="Docker memory limit per container (e.g. '4G', '8G'). "
+                             "Overrides docker-compose.yml setting.")
     return parser
 
 
@@ -204,6 +220,7 @@ def main() -> None:
 
             ok = run_scaling_container(
                 mode, num_workers, urls_volume, output_volume, extra_args,
+                args.cpus, args.memory,
             )
             if not ok:
                 failed.append(sub_name)
