@@ -62,6 +62,37 @@ def _jsonl_to_json(output_dir: Path, mode: str) -> None:
         json_path.write_text(json.dumps(entries, indent=2, default=str))
 
 
+def _merge_per_mode_files(output_dir: Path, modes: list[str]) -> None:
+    """Merge per-mode raw_metrics_{mode}.json files into raw_metrics.json.
+
+    This produces the combined format that analysis tools expect, keyed by
+    (host, rank) with each mode's data nested under the mode name.
+    """
+    mode_data: dict[str, list[dict]] = {}
+    for mode in modes:
+        entries = _load_per_mode_json(output_dir, mode)
+        if entries:
+            mode_data[mode] = entries
+
+    if not mode_data:
+        return
+
+    # Index by (host, rank) for each mode
+    by_key: dict[tuple[str, int], dict] = {}
+    for mode, entries in mode_data.items():
+        for entry in entries:
+            key = (entry["host"], entry["rank"])
+            if key not in by_key:
+                by_key[key] = {"host": entry["host"], "rank": entry["rank"]}
+            if mode in entry:
+                by_key[key][mode] = entry[mode]
+
+    merged = sorted(by_key.values(), key=lambda e: e.get("rank", 0))
+    (output_dir / "raw_metrics.json").write_text(
+        json.dumps(merged, indent=2, default=str)
+    )
+
+
 def _parse_diff_pairs(diff_pairs_str: str | None) -> set[tuple[str, str]]:
     """Parse 'HL-HF,HS-HF' into {('headless','headful'), ('headless-shell','headful')}."""
     if not diff_pairs_str:
@@ -361,10 +392,14 @@ async def _collect_only(args):
         for mode in modes:
             _jsonl_to_json(output_dir, mode)
 
+    # Merge per-mode files into a combined raw_metrics.json for analysis tools
+    _merge_per_mode_files(output_dir, modes)
+
     console.print("\n[bold green]Collection complete.[/bold green]")
     for mode in modes:
         path = output_dir / f"raw_metrics_{mode}.json"
         console.print(f"  {path}")
+    console.print(f"  {output_dir / 'raw_metrics.json'} (merged)")
     console.print()
 
 
