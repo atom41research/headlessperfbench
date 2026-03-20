@@ -1,0 +1,60 @@
+services:
+  headful:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: headful
+    shm_size: 8g
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp=unconfined
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    volumes:
+      - ./output/docker:/app/output
+      - ./urls.txt:/app/urls.txt:ro
+    command: ["--collect-only", "--modes", "headful", "--url-list", "urls.txt", "--output", "output"]
+
+  headless:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: headless
+    shm_size: 8g
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp=unconfined
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    volumes:
+      - ./output/docker:/app/output
+      - ./urls.txt:/app/urls.txt:ro
+    command: ["--collect-only", "--modes", "headless", "--url-list", "urls.txt", "--output", "output"]
+
+  headless-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: headless-shell
+    shm_size: 8g
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp=unconfined
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    volumes:
+      - ./output/docker:/app/output
+      - ./urls.txt:/app/urls.txt:ro
+    command: ["--collect-only", "--modes", "headless-shell", "--url-list", "urls.txt", "--output", "output"]

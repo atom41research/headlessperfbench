@@ -1,0 +1,10 @@
+- I'm using uv. Every module-related actions should be done via uv
+- For projects with optional dependencies, ensure dev deps are in `[dependency-groups].dev` so plain `uv sync` works
+- NEVER ignore import errors or dependency failures - they indicate broken environment
+- All tests must use Chrome (not Chromium)
+- All headless runs must use a user-agent string matching headful Chrome (do not reveal headless mode)
+- Always launch Chrome with `--disable-blink-features=AutomationControlled` to prevent automation markers
+- Always use system Chrome (`channel="chrome"`), never Playwright's bundled Chromium
+- Core data collection code is in `collector/` (was `rendering_comparison/`)
+- Post-collection analysis tools are in `analysis/`
+- Docker entrypoints run `python -m collector`

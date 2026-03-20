@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+*.db
+*.egg-info/
+dist/
+.ruff_cache/
+.mypy_cache/
+data/
+output/
+nohup.out
+.python-version
+.claude/
