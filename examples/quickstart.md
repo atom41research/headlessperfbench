@@ -17,10 +17,10 @@ A step-by-step guide to running headless vs headful Chrome rendering comparisons
 git clone https://github.com/atom41research/headlessperfbench.git
 cd headlessperfbench
 uv sync
-playwright install chrome
+uv run playwright install chrome
 ```
 
-`uv sync` installs all project dependencies from the lockfile. `playwright install chrome` downloads the Chrome browser driver needed by Playwright.
+`uv sync` installs all project dependencies from the lockfile. `uv run playwright install chrome` downloads the Chrome browser driver needed by Playwright.
 
 ## 3. Running a 3-Mode Comparison
 

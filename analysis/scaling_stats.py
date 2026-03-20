@@ -89,9 +89,12 @@ def timeline_stats(timeline: list[dict], key: str) -> dict | None:
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python -m analysis.scaling_stats <job_dir>")
-        sys.exit(1)
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print("Usage: python -m analysis scaling-stats <job_dir>")
+        print("\nScaling performance report (throughput, memory, CPU).")
+        print("Reads scaling_meta.json files from <job_dir> subdirectories.")
+        print("Outputs scaling_report.md in the same directory.")
+        sys.exit(0 if len(sys.argv) >= 2 else 1)
 
     job_dir = Path(sys.argv[1])
     configs = load_configs(job_dir)

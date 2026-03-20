@@ -86,9 +86,12 @@ def write_ratios_table(lines, title, metrics_list):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python -m analysis.comparison_stats <job_dir>")
-        sys.exit(1)
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print("Usage: python -m analysis stats <job_dir>")
+        print("\nGenerate comprehensive 3-mode comparison statistics report.")
+        print("Reads raw_metrics.json and results.csv from <job_dir>.")
+        print("Outputs comprehensive_stats.md in the same directory.")
+        sys.exit(0 if len(sys.argv) >= 2 else 1)
 
     job_dir = Path(sys.argv[1])
     raw_path = job_dir / "raw_metrics.json"

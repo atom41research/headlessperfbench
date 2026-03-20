@@ -57,7 +57,10 @@ cd headlessperfbench
 uv sync
 uv run playwright install chrome
 
-# Direct collection (requires system Chrome + Xvfb for headful)
+# Direct collection — headless only (simplest, no extra setup)
+uv run python -m collector --url-list examples/urls_10.txt --modes headless
+
+# Full 3-mode comparison (headful needs Xvfb, headless-shell needs `uv run playwright install`)
 uv run python -m collector --url-list examples/urls_10.txt --modes headful,headless,headless-shell
 ```
 

@@ -22,9 +22,12 @@ BUCKET_SIZE = 100
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python -m analysis.container_metrics <job_dir>")
-        sys.exit(1)
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print("Usage: python -m analysis container-metrics <job_dir>")
+        print("\nContainer cgroup memory analysis.")
+        print("Reads raw_metrics.json from <job_dir>.")
+        print("Prints bucketed memory progression and cross-validation tables.")
+        sys.exit(0 if len(sys.argv) >= 2 else 1)
 
     job_dir = Path(sys.argv[1])
     raw_path = job_dir / "raw_metrics.json"

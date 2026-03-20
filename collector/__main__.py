@@ -253,7 +253,7 @@ async def _collect_only(args):
         return
 
     # Scaling path (any worker count, including 1)
-    if args.workers >= 1:
+    if args.workers > 1:
         from .scaling import run_scaling_test, save_scaling_output
 
         output_dir: Path = args.output

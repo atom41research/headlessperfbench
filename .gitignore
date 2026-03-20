@@ -11,3 +11,4 @@ output/
 nohup.out
 .python-version
 .claude/
+headless_detection/
