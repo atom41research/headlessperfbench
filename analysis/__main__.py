@@ -10,6 +10,7 @@ Usage:
 """
 
 import sys
+from pathlib import Path
 
 
 SUBCOMMANDS = {
@@ -23,11 +24,12 @@ SUBCOMMANDS = {
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
-        print("Usage: python -m analysis <subcommand> [args...]\n")
+        prog = "hpb-analyze" if "hpb-analyze" in sys.argv[0] else "python -m analysis"
+        print(f"Usage: {prog} <subcommand> [args...]\n")
         print("Subcommands:")
         for name, (_, desc) in SUBCOMMANDS.items():
             print(f"  {name:<25} {desc}")
-        print("\nRun 'python -m analysis <subcommand> --help' for subcommand help.")
+        print(f"\nRun '{prog} <subcommand> --help' for subcommand help.")
         sys.exit(0)
 
     subcmd = sys.argv[1]
@@ -37,6 +39,18 @@ def main():
         sys.exit(1)
 
     module_path, _ = SUBCOMMANDS[subcmd]
+
+    # Validate job_dir argument if provided (first non-flag arg after subcommand)
+    remaining = sys.argv[2:]
+    positional = [a for a in remaining if not a.startswith("-")]
+    if positional:
+        job_dir = Path(positional[0])
+        if not job_dir.exists():
+            print(f"Error: job directory not found: {job_dir}")
+            sys.exit(1)
+        if not job_dir.is_dir():
+            print(f"Error: not a directory: {job_dir}")
+            sys.exit(1)
 
     # Remove the subcommand from argv so the module's argparse sees the right args
     sys.argv = [f"python -m analysis {subcmd}"] + sys.argv[2:]

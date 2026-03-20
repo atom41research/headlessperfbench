@@ -34,6 +34,8 @@ Full results are documented in [`docs/results_analysis.md`](docs/results_analysi
 
 ## Quick Start
 
+> See [`examples/quickstart.md`](examples/quickstart.md) for a detailed step-by-step guide with output structure and tips.
+
 ### Docker (recommended)
 
 Docker provides reproducible measurements with cgroup v2 resource isolation (4 CPUs, 8 GB RAM per container).
@@ -58,10 +60,10 @@ uv sync
 uv run playwright install chrome
 
 # Direct collection — headless only (simplest, no extra setup)
-uv run python -m collector --url-list examples/urls_10.txt --modes headless
+uv run python -m collector --url-list examples/urls_10.txt --modes headless --collect-only
 
 # Full 3-mode comparison (headful needs Xvfb, headless-shell needs `uv run playwright install`)
-uv run python -m collector --url-list examples/urls_10.txt --modes headful,headless,headless-shell
+uv run python -m collector --url-list examples/urls_10.txt --modes headful,headless,headless-shell --collect-only
 ```
 
 ---
