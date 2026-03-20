@@ -32,7 +32,7 @@ This command performs the following steps:
 
 1. **Builds 3 Docker images** (one per mode: headful, headless, headless-shell) using the multi-stage `Dockerfile`. Each image has its own browser configuration and dependencies.
 2. **Runs each mode sequentially** in isolated Docker containers with cgroup v2 resource limits (4 CPUs, 8 GB RAM, 8 GB shared memory). Sequential execution ensures modes do not compete for host resources.
-3. **Merges results** from the per-mode `raw_metrics_{mode}.json` files into a combined `merged_metrics.json`.
+3. **Merges results** from the per-mode `raw_metrics_{mode}.json` files into a combined `raw_metrics.json`.
 4. **Generates reports** including a markdown comparison report (`report.md`) and a CSV summary (`results.csv`).
 
 ## 4. Running Scaling Benchmarks
@@ -100,27 +100,24 @@ Prints a bucketed memory progression analysis showing container total memory (in
 
 ```
 output/jobs/job_YYYYMMDD_HHMMSS/
-├── headful/
-│   ├── raw_metrics_headful.json
-│   ├── screenshots/
-│   └── har/
-├── headless/
-│   ├── raw_metrics_headless.json
-│   ├── screenshots/
-│   └── har/
-├── headless-shell/
-│   ├── raw_metrics_headless-shell.json
-│   ├── screenshots/
-│   └── har/
-├── merged_metrics.json
+├── raw_metrics_headful.json
+├── raw_metrics_headful.jsonl
+├── raw_metrics_headless.json
+├── raw_metrics_headless.jsonl
+├── raw_metrics_headless-shell.json
+├── raw_metrics_headless-shell.jsonl
+├── raw_metrics.json
 ├── report.md
-└── results.csv
+├── results.csv
+├── screenshots/
+└── har/
 ```
 
 - `raw_metrics_{mode}.json` -- per-URL metrics collected by that mode's container.
+- `raw_metrics_{mode}.jsonl` -- streaming JSONL format (written during collection).
+- `raw_metrics.json` -- combined metrics from all three modes, merged by URL.
 - `screenshots/` -- full-page PNG screenshots, named `{rank}_{host}_{mode}.png`.
 - `har/` -- HTTP Archive files capturing all network requests.
-- `merged_metrics.json` -- combined metrics from all three modes, keyed by URL.
 - `report.md` -- markdown comparison report with diff severity analysis.
 - `results.csv` -- tabular summary of per-URL comparisons.
 
